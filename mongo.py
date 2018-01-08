@@ -1,9 +1,13 @@
+import argparse
 from functools import partial
 
 from bson.code import Code
 from pymongo import MongoClient
 
 from rule import Rule
+
+CONFS = [0.01, 0.25, 0.50, 0.75, 0.25, 0.25, 0.25, 0.25]
+SUPS = [0.01, 0.01, 0.01, 0.01, 0.05, 0.07, 0.20, 0.50]
 
 
 def create(db, filename):
@@ -85,18 +89,31 @@ def get_passes(rules, conf, sup):
     return sum(rule.conf > conf and rule.sup > sup for rule in rules)
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--create', action='store_true')
+    group.add_argument('--items', action='store_true')
+    group.add_argument('--pairs', action='store_true')
+    group.add_argument('--rules', action='store_true')
+    group.add_argument('--all', action='store_true')
+    return parser.parse_args()
+
+
 def main():
     client = MongoClient()
     db = client.shopping
-    # create(db, 'groceries.csv')
-    # count_items(db)
-    # count_pairs(db)
-    confs = [0.01, 0.25, 0.50, 0.75, 0.25, 0.25, 0.25, 0.25]
-    sups = [0.01, 0.01, 0.01, 0.01, 0.05, 0.07, 0.20, 0.50]
-
-    rules = get_rules(db)
-    passes = list(map(partial(get_passes, rules), confs, sups))
-    print(passes)
+    args = parse_args()
+    if args.create or args.all:
+        create(db, 'groceries.csv')
+    if args.items or args.all:
+        count_items(db)
+    if args.pairs or args.all:
+        count_pairs(db)
+    if args.rules or args.all:
+        rules = get_rules(db)
+        passes = list(map(partial(get_passes, rules), CONFS, SUPS))
+        print(passes)
 
 
 if __name__ == '__main__':
