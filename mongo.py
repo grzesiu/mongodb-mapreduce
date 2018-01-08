@@ -1,3 +1,5 @@
+from functools import partial
+
 from bson.code import Code
 from pymongo import MongoClient
 
@@ -79,17 +81,22 @@ def get_rules(db):
     return rules
 
 
+def get_passes(rules, conf, sup):
+    return sum(rule.conf > conf and rule.sup > sup for rule in rules)
+
+
 def main():
     client = MongoClient()
     db = client.shopping
     # create(db, 'groceries.csv')
     # count_items(db)
     # count_pairs(db)
-    # sups = [1, 1, 1, 1, 5, 7, 20, 50]
-    # confs = [1, 25, 50, 75, 25, 25, 25, 25]
+    confs = [0.01, 0.25, 0.50, 0.75, 0.25, 0.25, 0.25, 0.25]
+    sups = [0.01, 0.01, 0.01, 0.01, 0.05, 0.07, 0.20, 0.50]
 
     rules = get_rules(db)
-    print(rules)
+    passes = list(map(partial(get_passes, rules), confs, sups))
+    print(passes)
 
 
 if __name__ == '__main__':
