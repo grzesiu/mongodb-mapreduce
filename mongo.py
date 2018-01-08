@@ -86,7 +86,7 @@ def get_rules(db):
 
 
 def get_passes(rules, conf, sup):
-    return sum(rule.conf > conf and rule.sup > sup for rule in rules)
+    return [rule for rule in rules if rule.conf > conf and rule.sup > sup]
 
 
 def parse_args():
@@ -112,8 +112,13 @@ def main():
         count_pairs(db)
     if args.rules or args.all:
         rules = get_rules(db)
-        passes = list(map(partial(get_passes, rules), CONFS, SUPS))
-        print(passes)
+        rules_passed = list(map(partial(get_passes, rules), CONFS, SUPS))
+        print(list(map(len, rules_passed)))
+
+        for i in [3, 4, 5]:
+            print('{}:'.format(i + 1))
+            for rule in rules_passed[i]:
+                print(rule)
 
 
 if __name__ == '__main__':

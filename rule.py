@@ -6,7 +6,7 @@ class Rule:
         self.sup = sup
 
     def __str__(self):
-        return '{} - > {}: {}, {}'.format(self.i1, self.i2, self.conf, self.sup)
+        return '{} -> {}'.format(self.i1, self.i2)
 
     def __repr__(self):
         return self.__str__()
